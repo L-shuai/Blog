@@ -135,12 +135,10 @@ public class UserService implements UserDetailsService {
     @Transactional(rollbackFor = Exception.class)
     public void register(User userToAdd, String mailCode, String inviteCode) throws RuntimeException {
 
-
         //验证码无效 throw 异常
-        if (!checkMailCode(userToAdd.getMail(), mailCode)) {
-            throw new RuntimeException("验证码错误");
-        }
-
+        //if (!checkMailCode(userToAdd.getMail(), mailCode)) {
+            //throw new RuntimeException("验证码错误");
+        //}
 
         //有效
         //查询邀请码是否有效
@@ -148,8 +146,9 @@ public class UserService implements UserDetailsService {
 
         if (code == null || code.getState() != 0) {
             //无效 throw 异常
-            throw new RuntimeException("邀请码无效");
+            //throw new RuntimeException("邀请码无效");
         }
+
         //有效 保存用户
         final String username = userToAdd.getName();
         if (userDao.findUserByName(username) != null) {
@@ -161,21 +160,26 @@ public class UserService implements UserDetailsService {
         }
 
         List<Role> roles = new ArrayList<>(1);
+
         roles.add(roleService.findRoleByName("USER"));
-        userToAdd.setRoles(roles);//新注册用户赋予USER权限
+    
+	userToAdd.setRoles(roles);//新注册用户赋予USER权限
 
         final String rawPassword = userToAdd.getPassword();
         userToAdd.setPassword(encoder.encode(rawPassword));//加密密码
+
         userToAdd.setState(1);//正常状态
         userDao.saveUser(userToAdd);//保存角色
+
         //保存该用户的所有角色
         for (Role role : roles) {
             roleDao.saveUserRoles(userToAdd.getId(), role.getId());
         }
         // 更新邀请码状态
-        code.setUser(userToAdd);
-        code.setState(1);
-        codeDao.updateCode(code);
+        //code.setUser(userToAdd);
+        //code.setState(1);
+	//System.out.println(10);
+        //codeDao.updateCode(code);
     }
 
 
